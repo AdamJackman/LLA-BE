@@ -25,7 +25,6 @@ app.get('/', function (req, res) {
 
 
 //TODO: register/:uname/pword
-//TODO: logout
 
 /**
  * Check that there is a matching user in the users table.
@@ -121,75 +120,101 @@ function updateSession( userId, res ){
 * If we did not match on a login/register and we do not have a cookie then we should be creating an error at this point.
 */
 app.use(function (req, res, next) {
-  // check if client sent a cookie
-  var cookie = req.cookies.session;    
-  if (cookie === undefined) {
+  // check if client sent a cookie  
+  if (checkLogged(req) == false) {
     sendJSON({"Error": "No session detected"}, res);
-  }
-  next();
+  } else {
+    next();    
+  }  
 });
 
+//logout/
+app.get('/logout', function (req, res) {
+    var sessionId = req.cookies.session.sessionId;            
+    var queryString = "delete from sessions where sessionId=?";
+        
+    var query = db.query(queryString, sessionId, function(err, result){
+       if(err){
+           console.log("Error in query: " + err);
+       } else {
+           res.cookie('session',null, { maxAge: 900000, httpOnly: true});       sendJSON({"Sucess": "session removed"}, res);          
+       }
+    });
+});
 
-
-//properties/
-//properties/:id
-
-//properties/:id/tenants/
-//properties/:id/tenants/:id
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-* Create a helper to query the database
-* Note that db.query is asynchronous
-*/
-function runQuery( queryString , res){
-    var query = db.query( queryString, function(err, result){
+/**
+ * Using the session query the database for all properties of the user
+ */
+app.get('/properties', function (req, res) {    
+    var sessionId = req.cookies.session.sessionId;        
+    var queryString = "select * from properties JOIN sessions ON sessions.userId=properties.userId where sessions.sessionId=?";
+    var query = db.query( queryString, sessionId, function(err, result){
         if(err){
             console.log('Error in query: ' + err);
         } else {
             sendJSON(result, res);
-        } 
-    });
-}
+        }     
+    });        
+});
 
-/*
-* Create a helper for a simple single prepared statement
-* Note that db.query is asynchronous.
-*/
-function runPreparedStatment( queryString, val, res){
-    var resultSet_;
-    var query = db.query( queryString, val, function(err, result){
-       if(err){
-           console.log('Error in prepared statement: ' + err);
-       } else {
-           sendJSON(result, res);
-       }
-    });
-}
+
+/**
+ * Using the session query the database a properties of the user
+ * with a matching propertyId
+ */
+//properties/:id
+app.get('/properties/:id', function (req, res) {    
+    var sessionId = req.cookies.session.sessionId;        
+    var propertyId = req.params.id;
+    
+    var queryString = "select * from properties JOIN sessions ON sessions.userId=properties.userId where sessions.sessionId=? and properties.propertyId=?";
+    var query = db.query( queryString, [sessionId, propertyId], function(err, result){
+        if(err){
+            console.log('Error in query: ' + err);
+        } else {
+            sendJSON(result, res);
+        }     
+    });        
+});
+
+
+/**
+ * Grab all tenants for a property
+ */
+//properties/:id/tenants/
+app.get('/properties/:pid/tenants', function(req, res){
+    var sessionId = req.cookies.session.sessionId;        
+    var propertyId = req.params.pid;
+    var queryString = "select * from tenants where tenants.propertyId =(select propertyId from properties AS p JOIN sessions AS s ON s.userId=p.userId where s.sessionId=? and p.propertyId=?)";
+    
+    var query = db.query( queryString, [sessionId, propertyId], function(err, result){
+        if(err){
+            console.log('Error in query: ' + err);
+        } else {
+            sendJSON(result, res);
+        }     
+    });            
+});
+
+/**
+ * Grab a specific tenant from a property
+ */
+//properties/:id/tenants/:id
+app.get('/properties/:pid/tenants/:tid', function(req, res){
+    var sessionId = req.cookies.session.sessionId;        
+    var propertyId = req.params.pid;
+    var tenantId = req.params.tid;
+    var queryString = "select * from tenants where tenants.propertyId =(select propertyId from properties AS p JOIN sessions AS s ON s.userId=p.userId where s.sessionId=? and p.propertyId=?) and tenantId=?";
+    
+    var query = db.query( queryString, [sessionId, propertyId, tenantId], function(err, result){
+        if(err){
+            console.log('Error in query: ' + err);
+        } else {
+            sendJSON(result, res);
+        }     
+    });            
+});
+
 
 function sendJSON( toSend, res){
     res.setHeader('Content-Type', 'application/json');
