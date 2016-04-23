@@ -11,7 +11,11 @@
   "license": "ISC",
   "devDependencies": {
     "cookie-parser": "^1.4.1",
+    "express": "^4.13.4",
     "mysql": "^2.10.2",
     "nodemon": "^1.9.1"
+  },
+  "dependencies": {
+    "path-to-regexp": "^1.2.1"
   }
 }
