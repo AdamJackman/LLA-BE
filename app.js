@@ -45,7 +45,7 @@ app.get('/login/:username/:password', function (req, res) {
            console.log('Error in prepared statement: ' + err);
         } else {
             if(result.length == 1){ 
-                grabSession(result[0].userId, res, true);
+                upsertSession(result[0].userId, res);
             } else {
                 sendJSON({"error": "Login failed: Invalid credentials"}, res);
             }
@@ -57,18 +57,11 @@ function checkLogged(req){
     var cookie = req.cookies.session;
     return (cookie !== undefined && cookie.sessionId)? true : false;
 }
-
-/*
-* Grab a session that has already been created.
-*/
-function grabSession( userId, res){
-    grabSession( userId, res, false );
-}
 /*
 * Grab a session that has already been created.
 * if the create flag is true then upon finding no matches a new session will be created.
 */ 
-function grabSession( userId, res, create ){
+function grabSession( userId, res ){
     var queryString = "select sessionId from sessions where userId=? and visited_on > timestamp(DATE_SUB(NOW(), INTERVAL " + sessionTimeout_ + " MINUTE))";
     var query = db.query( queryString, userId, function(err, result){
         if (err){
@@ -78,11 +71,7 @@ function grabSession( userId, res, create ){
                res.cookie('session',result[0], { maxAge: 900000, httpOnly: true});
                sendJSON(result[0], res);
             } else {
-               if(create){
-                   upsertSession(userId, res);
-               } else {
-                   sendJSON({"error": "Session invalid: Login required"}, res);
-               }
+               sendJSON({"error": "Server Error: Could not allocate a session"}, res);               
             }
         }
     });        
