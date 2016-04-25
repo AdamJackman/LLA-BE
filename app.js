@@ -1,10 +1,15 @@
+var db = require('./db');
+var path = require('path');
 var express = require('express');
 var app = express();
-var db = require('./db');
+
 var cookieParser = require('cookie-parser');
 
 var sessionTimeout_ = "15";
 
+
+app.use('/', express.static(path.join(__dirname, 'public')));
+app.set('port', (process.env.PORT || 3000));
 app.use(cookieParser());
 
 app.use(function(req, res, next) {
@@ -13,14 +18,10 @@ app.use(function(req, res, next) {
   next();
 });
 
-var server = app.listen(3000, function(){
+var server = app.listen(app.get('port'), function(){
 	var host = server.address().address;
 	var port = server.address().port;
 
-});
-
-app.get('/', function (req, res) {  
-    res.send('LLA API');
 });
 
 
@@ -137,7 +138,8 @@ app.get('/logout', function (req, res) {
        if(err){
            console.log("Error in query: " + err);
        } else {
-           res.cookie('session',null, { maxAge: 900000, httpOnly: true});       sendJSON({"Sucess": "session removed"}, res);          
+           res.cookie('session',null, { maxAge: 900000, httpOnly: true});
+           sendJSON({"Sucess": "session removed"}, res);          
        }
     });
 });

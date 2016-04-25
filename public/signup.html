@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Lording</title>
+    
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/app.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.1/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.1/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.16/browser.js"></script>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+  </head>
+    
+  <body>
+      
+    <header id="header-hook"> </header>                              
+      
+    <h4 class="formTitle center" > Create Your Landlording Account </h4>  
+    <div class="container row">        
+        <div class="col s10 offset-s1" id="signup-box">                     
+        </div>           
+    </div>
+      
+    
+      
+    <script type="text/babel">
+      // REACT DEVELOPMENT AREA:
+      // Include the Reactive Components of the page here.      
+      
+      var Header = React.createClass({
+        render : function(){
+            return (
+                <div class="header" >
+                    <nav>
+                    <div>
+                        <a href="#" className="brand-logo center">Lording</a>
+                        <ul className="right hide-on-down">
+                            <li><a href="/login.html">Log in</a></li>
+                            <li><a href="/signup.html">Sign up</a></li>
+                        </ul>
+                    </div>            
+                    </nav>   
+                </div>
+            );
+        }
+      });
+      
+      var SignupForm = React.createClass({
+        render: function(){
+            var data = [
+                {id: 1, label: "First Name", placeholder: "", type: "text", offset:"offset-s1"},
+                {id: 2, label: "Last Name", placeholder: "", type: "text", offset:""},
+                {id: 3, label: "Username", placeholder: "", type: "text", offset:"offset-s1"},
+                {id: 4, label: "Password", placeholder: "", type: "password", offset:""}
+            ];
+            return(
+                <form>                        
+                    <DefinedForm data={data} />
+                    <input className="btn custom-button offset-s2" id="signup-button" name="commit" type="submit" value="Sign Up" />
+                    <h5 className="center"> Got an Account? Login <a href="/login.html">Here</a> </h5>
+                </form>                
+            );
+        }
+      });
+      
+      var DefinedForm = React.createClass({
+        render: function(){
+            var inputs = this.props.data.map(function(inp){
+                var classDef = "inp input-field col s5 " + inp.offset;
+                return(
+                    <div key={inp.id} className={classDef}>
+                        <input id={inp.id} type={inp.type} />
+                        <label data-for={inp.id} className="active" > {inp.label} </label>   
+                    </div>                
+                );            
+            });
+            return (
+                <div className="formContainer">
+                    {inputs}
+                </div>
+            );    
+        }
+      });      
+            
+      ReactDOM.render(<Header /> , document.getElementById('header-hook'));
+      ReactDOM.render(<SignupForm />, document.getElementById('signup-box'));
+                
+
+    </script>
+    <script type="text/javascript">
+
+    </script>
+                      
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+  </body>
+</html>
