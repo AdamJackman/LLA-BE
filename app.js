@@ -58,6 +58,14 @@ app.get('/login/:username/:password', function (req, res) {
     });
 });
 
+app.get('/login', function(req, res){
+   if(checkLogged(req) == true){
+       sendJSON({"loggedIn": true}, res);
+   } else {
+       sendJSON({"loggedIn": false}, res);
+   }
+});
+
 app.post('/register', function(req, res){
   var firstName = req.body.firstName;
   var lastName = req.body.lastName;

@@ -14,13 +14,7 @@
     
   <body>
       
-    <header id="header-hook"> </header>                              
-      
-    <h4 class="formTitle center" > Create Your Landlording Account </h4>  
-    <div class="container row">        
-        <div class="col s10 offset-s1" id="signup-box">                     
-        </div>           
-    </div>
+    <div id="root" />
       
     
       
@@ -33,18 +27,31 @@
       */
       var Header = React.createClass({
         render : function(){
+            var buttons;
+            if(this.props.loggedIn == true){
+                //TODO: Should not href but should ajax
+                buttons = <li><a href="/logout">Logout</a></li>;                
+            } else {
+                buttons = 
+                    <div>
+                        <li><a href="/login.html">Log in</a></li>
+                        <li><a href="/signup.html">Sign up</a></li>
+                    </div>;
+            }
+            
             return (
+                <header> 
                 <div class="header" >
                     <nav>
                     <div>
                         <a href="#" className="brand-logo center">Lording</a>
                         <ul className="right hide-on-down">
-                            <li><a href="/login.html">Log in</a></li>
-                            <li><a href="/signup.html">Sign up</a></li>
+                            {buttons}
                         </ul>
                     </div>            
                     </nav>   
                 </div>
+                </header> 
             );
         }
       });
@@ -93,18 +100,30 @@
         },  
         render: function(){
             //Define the input's of the form
-            var data = [
+            var formFields = [
                 {id: "firstName", label: "First Name", placeholder: "", type: "text", offset:"offset-s1"},
                 {id: "lastName", label: "Last Name", placeholder: "", type: "text", offset:""},
                 {id: "username", label: "Username", placeholder: "", type: "text", offset:"offset-s1"},
                 {id: "password", label: "Password", placeholder: "", type: "password", offset:""}
             ];
+            if(this.props.loggedIn){
+                //TODO -- THE LOGOUT SHOULD NOT BE A HREF BUT SHOULD SEND AJAX
+                return(
+                    <div>
+                        <h5 className=""> You are already logged in </h5>
+                        
+                        <h6 className="center"> Click <a href="/dashboard.html">here</a> to go to your dashboard </h6>
+                        <h6 className="center"> Want to Log Out? Click <a href="/logout">here</a> </h6> 
+                        
+                    </div>
+                );
+            }
             return(
                 <form onSubmit={this.handleSubmit}>
                     {/* Create the status box to hold errors */}
                     <StateBox status={this.state.status} message={this.state.message} />
                     {/* Create the form */}
-                    <DefinedForm data={data} />
+                    <DefinedForm formFields={formFields} />
                     {/* Create the submission button */}
                     <input className="btn custom-button offset-s2" id="signup-button" name="commit" type="submit" value="Sign Up" />
                     {/* Link to Login Section */}
@@ -120,7 +139,7 @@
       */
       var DefinedForm = React.createClass({
         render: function(){
-            var inputs = this.props.data.map(function(inp){
+            var inputs = this.props.formFields.map(function(inp){
                 var classDef = "inp input-field col s5 " + inp.offset;
                 return(
                     <div key={inp.id} className={classDef}>
@@ -148,8 +167,46 @@
       });
     
       //Place the elements onto the page
-      ReactDOM.render(<Header /> , document.getElementById('header-hook'));
-      ReactDOM.render(<SignupForm />, document.getElementById('signup-box'));
+      var SignupRoot = React.createClass({
+          getInitialState: function(){
+              return({loggedIn: false});
+          },
+          componentDidMount: function(){
+            $.ajax({
+                url: '/login',
+                dataType: 'json',
+                type: 'GET',
+                success: function(data) {
+                    if(data["loggedIn"]){
+                        console.log("logged in");
+                        this.setState({loggedIn: true});    
+                    } else {
+                        console.log("not logged in");
+                        this.setState({loggedIn: false});    
+                    }                    
+                }.bind(this),
+                error: function(xhr, status, err){
+                    console.error(status, err.toString());
+                }.bind(this)
+            }); 
+          },
+          render: function(){
+            return(
+                <div>                
+                    <Header loggedIn={this.state.loggedIn} />
+                    <h4 className="formTitle center" > Create Your Landlording Account </h4>  
+                    <div className="container row">        
+                        <div className="col s10 offset-s1" id="signup-box">  
+                            <SignupForm loggedIn={this.state.loggedIn} />
+                        </div>           
+                    </div>
+                </div>
+            );
+          }
+      });
+
+      //Attach the root element
+      ReactDOM.render(<SignupRoot />, document.getElementById('root'));
                 
 
     </script>
