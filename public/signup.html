@@ -26,8 +26,11 @@
       
     <script type="text/babel">
       // REACT DEVELOPMENT AREA:
-      // Include the Reactive Components of the page here.      
-      
+              
+      /**
+      * This component represents the Header at the top of the page.
+      * ---TODO--- Should be reactive to the login state
+      */
       var Header = React.createClass({
         render : function(){
             return (
@@ -46,24 +49,75 @@
         }
       });
       
+
+      /**
+      * This component represents the Sign up form.
+      * Uses: DefinedForm: which is a generic form helper.
+      */
       var SignupForm = React.createClass({
+        getInitialState: function() {
+          return {status: 'ready', message: ''};  
+        },
+        handleSubmit: function(e){
+            //Grab the input data to be submitted
+            e.preventDefault();
+            var formData = {};
+            $('form input[type=text], form input[type=password]').each(function(){
+                var dataName = $(this).attr("id");
+                var dataval = $(this).val();
+                formData[dataName] = dataval;
+            });
+            this.sendRequest(formData);
+        },
+        sendRequest : function(formData){
+            //Create the AJAX request to signup the user
+            $.ajax({
+                url: '/register',
+                dataType: 'json',
+                type: 'POST',
+                data: formData,
+                success: function(data) {
+                    if(data["error"]){
+                        this.setState({status: "error"});    
+                        this.setState({message: data["error"]})
+                    } else {
+                        this.setState({status: "success"});
+                        this.setState({message: data["success"]})
+                    }
+                    
+                }.bind(this),
+                error: function(xhr, status, err){
+                    console.error(status, err.toString());
+                }.bind(this)
+            });
+        },  
         render: function(){
+            //Define the input's of the form
             var data = [
-                {id: 1, label: "First Name", placeholder: "", type: "text", offset:"offset-s1"},
-                {id: 2, label: "Last Name", placeholder: "", type: "text", offset:""},
-                {id: 3, label: "Username", placeholder: "", type: "text", offset:"offset-s1"},
-                {id: 4, label: "Password", placeholder: "", type: "password", offset:""}
+                {id: "firstName", label: "First Name", placeholder: "", type: "text", offset:"offset-s1"},
+                {id: "lastName", label: "Last Name", placeholder: "", type: "text", offset:""},
+                {id: "username", label: "Username", placeholder: "", type: "text", offset:"offset-s1"},
+                {id: "password", label: "Password", placeholder: "", type: "password", offset:""}
             ];
             return(
-                <form>                        
+                <form onSubmit={this.handleSubmit}>
+                    {/* Create the status box to hold errors */}
+                    <StateBox status={this.state.status} message={this.state.message} />
+                    {/* Create the form */}
                     <DefinedForm data={data} />
+                    {/* Create the submission button */}
                     <input className="btn custom-button offset-s2" id="signup-button" name="commit" type="submit" value="Sign Up" />
+                    {/* Link to Login Section */}
                     <h5 className="center"> Got an Account? Login <a href="/login.html">Here</a> </h5>
                 </form>                
             );
-        }
+        }        
       });
       
+      /**
+      * A helper function that will create standard input label pairs using props
+      * props: data - this prop should contain a list of objects that define a pair
+      */
       var DefinedForm = React.createClass({
         render: function(){
             var inputs = this.props.data.map(function(inp){
@@ -82,13 +136,21 @@
             );    
         }
       });      
-            
+
+      var StateBox = React.createClass({
+         render: function(){
+             return (
+                <div className={this.props.status}>                  
+                 <p>{this.props.message}</p>                   
+                </div>
+             );
+         } 
+      });
+    
+      //Place the elements onto the page
       ReactDOM.render(<Header /> , document.getElementById('header-hook'));
       ReactDOM.render(<SignupForm />, document.getElementById('signup-box'));
                 
-
-    </script>
-    <script type="text/javascript">
 
     </script>
                       

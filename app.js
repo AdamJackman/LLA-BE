@@ -3,6 +3,7 @@ var path = require('path');
 var express = require('express');
 var app = express();
 
+var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 
 var sessionTimeout_ = "15";
@@ -11,6 +12,8 @@ var sessionTimeout_ = "15";
 app.use('/', express.static(path.join(__dirname, 'public')));
 app.set('port', (process.env.PORT || 3000));
 app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true }));
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -39,6 +42,8 @@ app.get('/login/:username/:password', function (req, res) {
     var queryString = "select userId from users where username=? and encPass=?";
     var username = req.params.username;
     var password = req.params.password;
+    
+    //TODO: Hash Password
         
     var query = db.query( queryString, [username, password], function(err, result){
         if(err){
@@ -52,6 +57,48 @@ app.get('/login/:username/:password', function (req, res) {
        }
     });
 });
+
+app.post('/register', function(req, res){
+  var firstName = req.body.firstName;
+  var lastName = req.body.lastName;
+  var username = req.body.username;
+  var password = req.body.password;
+
+  if(!firstName || !lastName || !username || !password){
+      sendJSON({"error": "Please Fill Out All Fields"}, res);
+  } else {
+    //TODO: Hash Password 
+    var queryString = "select userId from users where username=?";
+    var query = db.query( queryString, username, function(err, result){
+    if(err){
+      } else {
+        if(result.length == 0){
+          registerUser(req,res);
+        } else {
+          sendJSON({"error": "Username already in use"}, res);       
+        }
+      }
+    });
+  }
+});
+
+function registerUser(req,res){
+   
+  var firstName = req.body.firstName;
+  var lastName = req.body.lastName;
+  var username = req.body.username;
+  var password = req.body.password;
+    
+  //username not in use. Let's register.
+  var registerQueryString = "insert into users(firstName, lastName, username, encPass) values(?,?,?,?)";
+  var registerQuery = db.query( registerQueryString, [firstName, lastName, username, password], function(err, result){
+    if(err){
+      console.log('Error in query: ' + err);
+    } else {
+      sendJSON({"success": "Registration Complete: Successfully Registered"}, res);
+    }
+  });    
+}
 
 function checkLogged(req){
     var cookie = req.cookies.session;

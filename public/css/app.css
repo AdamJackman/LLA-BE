@@ -48,3 +48,13 @@ label {
     color: white;
     margin: 10px 0 10px 10%;
 }
+
+.error{
+    color: #f44336;
+    font-size: 16px;         
+}
+
+.success{
+    color: #4caf50;
+    font-size: 16px;         
+}
