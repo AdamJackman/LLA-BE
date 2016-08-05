@@ -3,8 +3,9 @@ var path = require('path');
 var express = require('express');
 var app = express();
 
-var AuthService = require('./utils/AuthService');
+var SessionService = require('./utils/SessionService');
 var ResponseService = require('./utils/ResponseService');
+var UserService = require('./utils/UserService');
 
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -31,59 +32,38 @@ var server = app.listen(app.get('port'), function(){
  * If they exist create a session and pass back the session id.
  */
 app.get('/login/:username/:password', function (req, res) { //TODO: Post
-  if(AuthService.checkLoggedIn(req) == true) {
-    return ResponseService.sendJSON({"error": "User already logged in"}, res);
-  }
-  //TODO: Abstract out of the endpoint
-  var queryString = "select userId from users where username=? and encPass=?";
-  var username = req.params.username;
-  var password = req.params.password;
-
-  //TODO: Hash Password
-  var query = db.query(queryString, [username, password], function(err, result) {
-    if(err) {
-      console.log('Error in prepared statement: ' + err);
-    } else {
-      if(result.length == 1) {
-        AuthService.upsertSession(result[0].userId, res);
-      } else {
-        ResponseService.sendJSON({"error": "Login failed: Invalid credentials"}, res);
-      }
-    }
+  SessionService.checkLoggedIn(
+    req, 
+    res,
+    function(req, res) {
+      ResponseService.sendJSON({"error": "User already logged in"}, res);
+    }, function(req,res) {
+      UserService.login(req, res);
   });
 });
 
 app.get('/login', function(req, res) { //TODO: testing endpoint only
-  if(AuthService.checkLoggedIn(req) == true) {
-    ResponseService.sendJSON({"loggedIn": true}, res);
-  } else {
-    ResponseService.sendJSON({"loggedIn": false}, res);
-  }
+  SessionService.checkLoggedIn(
+    req,
+    res,
+    function(req, res) {
+      ResponseService.sendJSON({"loggedIn": true}, res);  
+    },
+    function(req, res) {
+      ResponseService.sendJSON({"loggedIn": false}, res);
+  });
 });
 
 app.post('/register', function(req, res) {
-  //TODO: Abstract out of this file
-  var firstName = req.body.firstName;
-  var lastName = req.body.lastName;
-  var username = req.body.username;
-  var password = req.body.password;
-
-  if(!firstName || !lastName || !username || !password) {
-      ResponseService.sendJSON({"error": "Please Fill Out All Fields"}, res);
-  } else {
-    //TODO: Hash Password 
-    var queryString = "select userId from users where username=?";
-    var query = db.query(queryString, username, function(err, result) {
-    if(err) {
-      } else {
-        if(result.length == 0) {
-          AuthService.registerUser(req,res);
-        } else {
-          ResponseService.sendJSON({"error": "Username already in use"}, res);
-        }
-      }
-    });
-  }
+  SessionService.checkLoggedIn(
+    req,
+    res,
+    function(req, res) {
+      ResponseService.sendJSON({"error": "User Already logged in"}, res);
+    },
+    function(req, res) {
+      UserService.register(req,res)    
+  });  
 });
 
 /**
@@ -92,7 +72,7 @@ app.post('/register', function(req, res) {
 */
 app.use(function (req, res, next) {
   // check if client sent a cookie  
-  if (AuthService.checkLoggedIn(req) == false) {
+  if (SessionService.checkLoggedIn(req) == false) {
     ResponseService.sendJSON({"Error": "No session detected"}, res);
   } else {
     next();

@@ -1,3 +1,4 @@
+use be_development;
 drop table tenants;
 create table tenants(
 	tenantId SERIAL NOT NULL,  

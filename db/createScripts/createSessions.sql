@@ -1,3 +1,4 @@
+use be_development;
 drop table sessions;
 create table sessions(
 	sessionId SERIAL NOT NULL,  
