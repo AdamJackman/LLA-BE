@@ -3,9 +3,9 @@ var path = require('path');
 var express = require('express');
 var app = express();
 
-var SessionService = require('./utils/SessionService');
-var ResponseService = require('./utils/ResponseService');
-var UserService = require('./utils/UserService');
+var SessionService = require('./services/SessionService');
+var ResponseService = require('./services/ResponseService');
+var UserService = require('./services/UserService');
 
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -27,45 +27,11 @@ var server = app.listen(app.get('port'), function(){
 	var port = server.address().port;
 });
 
-/**
- * Check that there is a matching user in the users table.
- * If they exist create a session and pass back the session id.
- */
-app.get('/login/:username/:password', function (req, res) { //TODO: Post
-  SessionService.checkLoggedIn(
-    req, 
-    res,
-    function(req, res) {
-      ResponseService.sendJSON({"error": "User already logged in"}, res);
-    }, function(req,res) {
-      UserService.login(req, res);
-  });
-});
 
-app.get('/login', function(req, res) { //TODO: testing endpoint only
-  SessionService.checkLoggedIn(
-    req,
-    res,
-    function(req, res) {
-      ResponseService.sendJSON({"loggedIn": true}, res);  
-    },
-    function(req, res) {
-      ResponseService.sendJSON({"loggedIn": false}, res);
-  });
-});
-
-app.post('/register', function(req, res) {
-  SessionService.checkLoggedIn(
-    req,
-    res,
-    function(req, res) {
-      ResponseService.sendJSON({"error": "User Already logged in"}, res);
-    },
-    function(req, res) {
-      UserService.register(req,res)    
-  });  
-});
-
+/*
+* The User Controller Pages are available before the login wall
+*/
+require('./controllers/UserController')(app);
 /**
 * This is the Login Filter:
 * If we did not match on a login/register and we do not have an active session then we cannot continue
