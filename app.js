@@ -71,12 +71,15 @@ app.post('/register', function(req, res) {
 * If we did not match on a login/register and we do not have an active session then we cannot continue
 */
 app.use(function (req, res, next) {
-  // check if client sent a cookie  
-  if (SessionService.checkLoggedIn(req) == false) {
-    ResponseService.sendJSON({"Error": "No session detected"}, res);
-  } else {
-    next();
-  }  
+  SessionService.checkLoggedIn(
+    req,
+    res,
+    function(req, res) {
+      next();  
+    },
+    function(req, res) {
+      ResponseService.sendJSON({"Error": "No session detected"}, res);
+    }) 
 });
 
 //logout
