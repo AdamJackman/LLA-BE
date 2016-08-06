@@ -1,5 +1,6 @@
 var db = require('../db/db');
 var ResponseService = require('../services/ResponseService');
+var PropertyService = require('../services/PropertyService');
 
 var PropertyController = function(app){
   /**
@@ -7,31 +8,16 @@ var PropertyController = function(app){
    */
   app.get('/properties', function (req, res) {
     var sessionId = req.cookies.session.sessionId;
-    var queryString = "select * from properties JOIN sessions ON sessions.userId=properties.userId where sessions.sessionId=?";
-    var query = db.query(queryString, sessionId, function(err, result) {
-      if(err) {
-        console.log('Error in query: ' + err);
-      } else {
-        ResponseService.sendJSON(result, res);
-      }
-    });
+    PropertyService.getProperties(sessionId, res);
   });
   /**
    * Using the session query the database a properties of the user
    * with a matching propertyId
    */
-  //properties/:id
   app.get('/properties/:id', function (req, res) {
     var sessionId = req.cookies.session.sessionId;
     var propertyId = req.params.id;
-    var queryString = "select * from properties JOIN sessions ON sessions.userId=properties.userId where sessions.sessionId=? and properties.propertyId=?";
-    var query = db.query(queryString, [sessionId, propertyId], function(err, result) {
-      if(err) {
-        console.log('Error in query: ' + err);
-      } else {
-        ResponseService.sendJSON(result, res);
-      }
-    });
+    PropertyService.getProperty(sessionId, propertyId, res);
   });
 
   /**
