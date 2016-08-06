@@ -62,7 +62,7 @@ var SessionService = {
   updateSession : function(userId, res) {
     var onSuccess = function(err, result) {
       if (err) { throw new SessionServiceException('Error trying to grab session.'); }      
-      this.grabSession( userId, res );
+      this.grabSession(userId, res );
     }
     SessionStore.updateSessionForUser(userId, onSucess.bind(this));
   },

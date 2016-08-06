@@ -7,9 +7,7 @@ var UserService = {
 	* Lookup if there is a userName and password match,
 	* if there is then upsert
 	*/
-	login : function(req, res) {
-	  var username = req.params.username;
-	  var password = req.params.password;
+	login : function(username, password, res) {
 	  var onSuccess = function(err, result) {
 	    if (err) { throw new UserServiceException('Error trying to login user.'); }
       if (result.length == 1) {
@@ -23,12 +21,7 @@ var UserService = {
 	/**
   * Insert into the database a new user
   */
-  registerUser : function(req,res) {   
-    var firstName = req.body.firstName;
-    var lastName  = req.body.lastName;
-    var username  = req.body.username;
-    var password  = req.body.password; //TODO: Encryption
-
+  registerUser : function(firstName, lastName, username, password, res) {   
   	if(!firstName || !lastName || !username || !password) {
       return ResponseService.sendJSON({"error": "Please Fill Out All Fields"}, res);
   	}
