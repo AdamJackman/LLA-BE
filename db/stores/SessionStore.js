@@ -20,6 +20,10 @@ var SessionStore = {
     var queryString = "select sessionId from sessions where sessionId=? and visited_on > timestamp(DATE_SUB(NOW(), INTERVAL " 
       + sessionTimeout_ + " MINUTE));";
     db.query(queryString, sessionId, success);
+  },
+  removeForSessionId: function(sessionId, success) {
+    var queryString = "delete from sessions where sessionId=(?)";
+    db.query(queryString, sessionId, success);
   }
 };
 module.exports = SessionStore;

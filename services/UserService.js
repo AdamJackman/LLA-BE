@@ -1,4 +1,3 @@
-var db = require('../db/db');
 var SessionService = require('./SessionService');
 var ResponseService = require('./ResponseService');
 var UserStore = require('../db/stores/UserStore');

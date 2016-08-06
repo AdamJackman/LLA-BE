@@ -1,4 +1,3 @@
-var db = require('../db/db');
 var ResponseService = require('./ResponseService');
 var SessionStore = require('../db/stores/SessionStore');
 
@@ -67,6 +66,16 @@ var SessionService = {
       this.grabSession( userId, res );
     }
     SessionStore.updateSessionForUser(userId, onSucess.bind(this));
+  },
+  //
+  removeSession : function(sessionId, res) {
+    if(!sessionId) { throw new SessionServiceException('')}
+    var onSuccess = function(err, result) {
+      if (err) { throw new SessionServiceException('Error trying to delete session'); }
+      res.cookie('session', null, { maxAge: 900000, httpOnly: true});
+      ResponseService.sendJSON({"Success": "session removed"}, res);
+    }
+    SessionStore.removeForSessionId(sessionId, onSuccess.bind(this));
   }
 };
 function SessionServiceException(message) {
