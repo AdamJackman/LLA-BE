@@ -1,6 +1,7 @@
 var db = require('../db/db');
 var ResponseService = require('../services/ResponseService');
 var PropertyService = require('../services/PropertyService');
+var TenantService = require('../services/TenantService');
 
 var PropertyController = function(app){
   /**
@@ -19,39 +20,22 @@ var PropertyController = function(app){
     var propertyId = req.params.id;
     PropertyService.getProperty(sessionId, propertyId, res);
   });
-
   /**
    * Grab all tenants for a property
    */
-  //properties/:id/tenants/
   app.get('/properties/:pid/tenants', function(req, res) {
       var sessionId = req.cookies.session.sessionId;
       var propertyId = req.params.pid;
-      var queryString = "select * from tenants where tenants.propertyId =(select propertyId from properties AS p JOIN sessions AS s ON s.userId=p.userId where s.sessionId=? and p.propertyId=?)";
-      var query = db.query(queryString, [sessionId, propertyId], function(err, result) {
-          if(err) {
-              console.log('Error in query: ' + err);
-          } else {
-              ResponseService.sendJSON(result, res);
-          }
-      });
+      TenantService.getPropertyTenants(sessionId, propertyId, res);
   });
   /**
    * Grab a specific tenant from a property
    */
-  //properties/:id/tenants/:id
   app.get('/properties/:pid/tenants/:tid', function(req, res){
     var sessionId = req.cookies.session.sessionId;
     var propertyId = req.params.pid;
     var tenantId = req.params.tid;
-    var queryString = "select * from tenants where tenants.propertyId =(select propertyId from properties AS p JOIN sessions AS s ON s.userId=p.userId where s.sessionId=? and p.propertyId=?) and tenantId=?";
-    var query = db.query(queryString, [sessionId, propertyId, tenantId], function(err, result) {
-      if(err) {
-        console.log('Error in query: ' + err);
-      } else {
-        ResponseService.sendJSON(result, res);
-      }
-    });
+    TenantService.getPropertyTenant(sessionId, propertyId, tenantId, res);
   });
 };
 module.exports = PropertyController;
