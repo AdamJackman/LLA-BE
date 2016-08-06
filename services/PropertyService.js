@@ -16,7 +16,6 @@ var PropertyService = {
    * Using the session query the database a properties of the user
    * with a matching propertyId
    */
-  //properties/:id
   getProperty: function (sessionId, propertyId, res) {
     var onSuccess = function(err, result) {
       if(err) { throw new PropertyServiceException('Error trying to get a specific Property'); }

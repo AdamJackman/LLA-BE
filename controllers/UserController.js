@@ -13,23 +13,12 @@ var UserController = function(app){
       res,
       function(req, res) {
         ResponseService.sendJSON({"error": "User already logged in"}, res);
-      }, function(req,res) {
+      },
+      function(req,res) {
         UserService.login(req, res);
     });
   });
-
-  app.get('/login', function(req, res) { //TODO: testing endpoint only
-    SessionService.checkLoggedIn(
-      req,
-      res,
-      function(req, res) {
-        ResponseService.sendJSON({"loggedIn": true}, res);
-      },
-      function(req, res) {
-        ResponseService.sendJSON({"loggedIn": false}, res);
-    });
-  });
-
+  //
   app.post('/register', function(req, res) {
     SessionService.checkLoggedIn(
       req,
@@ -39,6 +28,18 @@ var UserController = function(app){
       },
       function(req, res) {
         UserService.register(req,res)
+    });
+  });
+  //
+  app.get('/login', function(req, res) { //TODO: testing endpoint only
+    SessionService.checkLoggedIn(
+      req,
+      res,
+      function(req, res) {
+        ResponseService.sendJSON({"loggedIn": true}, res);
+      },
+      function(req, res) {
+        ResponseService.sendJSON({"loggedIn": false}, res);
     });
   });
 };

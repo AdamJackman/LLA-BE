@@ -4,7 +4,6 @@ var SessionStore = require('../db/stores/SessionStore');
 var SessionService = {
   /* 
   * Look for a cookie in the request
-  * TODO: Validation on the validity of the cookie
   */
   checkLoggedIn : function(req, res, onSession, onNoSession) {
     if (req.cookies.session === undefined || !req.cookies.session.sessionId) { return onNoSession(req, res); }

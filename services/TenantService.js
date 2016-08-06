@@ -1,11 +1,10 @@
 var ResponseService = require('./ResponseService');
 var TenantStore = require('../db/stores/TenantStore');
 
-var PropertyService = {
+var TenantService = {
   /**
    * Grab all tenants for a property
    */
-  //properties/:id/tenants/
   getPropertyTenants: function(sessionId, propertyId, res) {
     var onSuccess = function(err, result) {
       if(err) { throw new PropertyServiceException('Error trying to get Tenatnts for a property'); }
@@ -16,7 +15,6 @@ var PropertyService = {
   /**
    * Grab a specific tenant from a property
    */
-  //properties/:id/tenants/:id
   getPropertyTenant: function(sessionId, propertyId, tenantId, res){
     var onSuccess = function(err, result) {
       if(err) { throw new PropertyServiceException('Error Getting a Tenant for a Property') }
@@ -29,4 +27,4 @@ function TenantServiceException(message) {
    this.message = message;
    this.name = "TenantServiceException";
 }
-module.exports = PropertyService;
+module.exports = TenantService;
